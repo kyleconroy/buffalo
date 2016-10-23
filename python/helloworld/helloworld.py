@@ -38,11 +38,14 @@ def attach_greeter(server, greeter: Greeter):
     })
 
 
-class GreeterClient(pb.Client):
+class GreeterClient(object):
     """
     The Gretter client definition.
     """
+    def __init__(self, srv):
+        self.srv = srv
+
     async def say_hello(self, name="") -> HelloReply:
-        return self.call('helloworld.Greeter/SayHello', HelloRequest(
+        return await self.srv.say_hello(None, HelloRequest(
             name=name,
-        )
+        ))

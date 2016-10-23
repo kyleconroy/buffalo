@@ -1,18 +1,23 @@
 from collections import namedtuple
-from typing import Type
+from typing import Type as T
 from google.protobuf import descriptor
 from google.protobuf import reflection
 from google.protobuf import message
+from enum import Enum
 
 ## Annotations
 Field = namedtuple('Field', ['number', 'type', 'repeated', 'union'])
+
 
 def field(tag, t, repeated=False, union=None):
     return Field(tag, t, repeated, union)
 
 
-class Message(object):
+class Type(Enum):
+    int32 = 1
 
+
+class Message(object):
     def __repr__(self):
         name = self.__class__.__name__
         attrs = ["{}={}".format(k, repr(getattr(self, k))) for k in self.__annotations__.keys()]
@@ -20,7 +25,7 @@ class Message(object):
 
 
 # Encode / Decode
-def _pbmessage(msgcls: Type[Message]) -> message.Message:
+def _pbmessage(msgcls: T[Message]) -> message.Message:
     full_name = '{}.{}'.format(msgcls.__module__, msgcls.__name__)
     fields = []
 
@@ -56,7 +61,7 @@ def _pbmessage(msgcls: Type[Message]) -> message.Message:
     ))()
 
 
-def decode(msg: bytes, t: Type[Message]) -> Message:
+def decode(msg: bytes, t: T[Message]) -> Message:
     m = _pbmessage(t)
     m.ParseFromString(msg)
     params = {}

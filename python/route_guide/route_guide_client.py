@@ -1,9 +1,9 @@
+import asyncio
 import random
 import time
 
-import grpc
-
 import route_guide
+import route_guide_server
 import route_guide_resources
 
 
@@ -31,16 +31,14 @@ async def guide_get_feature(client):
 
 
 async def guide_list_features(client):
-    rectangle = route_guide.Rectangle(
-        lo=route_guide.Point(latitude=400000000, longitude=-750000000),
-        hi=route_guide.Point(latitude=420000000, longitude=-730000000))
-
+    lo = route_guide.Point(latitude=400000000, longitude=-750000000)
+    hi = route_guide.Point(latitude=420000000, longitude=-730000000)
     print("Looking for features between 40, -75 and 42, -73")
-    async for feature in client.list_features(rectangle)
+    async for feature in client.list_features(lo=lo, hi=hi):
         print("Feature called %s at %s" % (feature.name, feature.location))
 
 
-def generate_route(feature_list):
+async def generate_route(feature_list):
     for _ in range(0, 10):
         random_feature = feature_list[random.randint(0, len(feature_list) - 1)]
         print("Visiting point %s" % random_feature.location)
@@ -80,8 +78,8 @@ async def guide_route_chat(client):
 
 
 async def run():
-    channel = grpc.insecure_channel('localhost:50051')
-    client = route_guide.RouteGuideClient(channel)
+    server = route_guide_server.RouteGuider()
+    client = route_guide.RouteGuideClient(server)
     print("-------------- GetFeature --------------")
     await guide_get_feature(client)
     print("-------------- ListFeatures --------------")

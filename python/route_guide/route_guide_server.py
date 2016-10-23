@@ -2,9 +2,7 @@ import asyncio
 import time
 import math
 
-import grpc
-
-import route_guide_pb2
+import route_guide
 import route_guide_resources
 
 
@@ -66,7 +64,7 @@ class RouteGuider(route_guide.RouteGuide):
         prev_point = None
 
         start_time = time.time()
-        async for point in reqstream:
+        async for point in stream:
             point_count += 1
             if get_feature(self.db, point):
                 feature_count += 1
@@ -82,19 +80,10 @@ class RouteGuider(route_guide.RouteGuide):
 
     async def route_chat(self, ctx, stream):
         prev_notes = []
-        async for new_note in stream:
-            for prev_note in prev_notes:
-                if prev_note.location == new_note.location:
-                    yield prev_note
-            prev_notes.append(new_note)
-
-
-def serve():
-    server = grpc.async_server(asyncio.get_event_loop())
-    helloworld.attach_route_guide(server, RouteGuider())
-    server.add_insecure_port('[::]:50051')
-    server.start()
-
-
-if __name__ == '__main__':
-    serve()
+        async for note in stream:
+            for prev in prev_notes:
+                lat = prev.location.latitude == note.location.latitude
+                lng = prev.location.longitude == note.location.longitude
+                if lat and lng:
+                    yield prev
+            prev_notes.append(note)

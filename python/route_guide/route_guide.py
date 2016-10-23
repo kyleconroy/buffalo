@@ -62,9 +62,9 @@ class RouteNote(pb.Message):
     """The message to be sent."""
     message: pb.field(2, str)
 
-    def __init__(self, location=None, msg=""):
+    def __init__(self, location=None, message=""):
         self.location = location
-        self.msg = msg
+        self.message = message
 
 
 class RouteSummary(pb.Message):
@@ -96,7 +96,7 @@ class RouteSummary(pb.Message):
         self.elapsed_time = elapsed_time
 
 
-class RouteGuider(object):
+class RouteGuide(object):
     """Provides methods that implement functionality of route guide server."""
 
     async def get_feature(self, ctx, request):
@@ -112,23 +112,26 @@ class RouteGuider(object):
         raise NotImplementedError()
 
 
-class RouteGuiderClient(pb.Client)
+class RouteGuideClient(object):
     """Provides methods that implement functionality of route guide server."""
 
+    def __init__(self, srv):
+        self.srv = srv
+
     async def get_feature(self, latitude=0, longitude=0):
-        return self.call('route_guide.RouterGuide/GetFeature', Point(
+        return await self.srv.get_feature(None, Point(
             longitude=longitude,
             latitude=latitude,
-        )
+        ))
 
     async def list_features(self, lo=None, hi=None):
-        return self.server_stream('route_guide.RouterGuide/ListFeatures', Point(
-            lo=lo,
-            hi=hi,
-        )
+        rect = Rectangle(lo=lo, hi=hi)
+        async for feature in self.srv.list_features(None, rect):
+            yield feature
 
     async def record_route(self, stream):
-        return self.client_stream('route_guide.RouterGuide/RecordRoute', stream)
+        return await self.srv.record_route(None, stream)
 
     async def route_chat(self, stream):
-        return self.bistream('route_guide.RouterGuide/RouteChat', stream)
+        async for note in self.srv.route_chat(None, stream):
+            yield note

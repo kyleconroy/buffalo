@@ -36,9 +36,7 @@ async def guide_list_features(client):
         hi=route_guide.Point(latitude=420000000, longitude=-730000000))
 
     print("Looking for features between 40, -75 and 42, -73")
-    features = await client.list_features(rectangle)
-
-    for feature in features:
+    async for feature in client.list_features(rectangle)
         print("Feature called %s at %s" % (feature.name, feature.location))
 
 

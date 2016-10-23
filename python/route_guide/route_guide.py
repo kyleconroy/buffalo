@@ -96,7 +96,7 @@ class RouteSummary(pb.Message):
         self.elapsed_time = elapsed_time
 
 
-class RouteGuider(route_guide.RouteGuide):
+class RouteGuider(object):
     """Provides methods that implement functionality of route guide server."""
 
     async def get_feature(self, ctx, request):
@@ -110,3 +110,25 @@ class RouteGuider(route_guide.RouteGuide):
 
     async def route_chat(self, ctx, stream):
         raise NotImplementedError()
+
+
+class RouteGuiderClient(pb.Client)
+    """Provides methods that implement functionality of route guide server."""
+
+    async def get_feature(self, latitude=0, longitude=0):
+        return self.call('route_guide.RouterGuide/GetFeature', Point(
+            longitude=longitude,
+            latitude=latitude,
+        )
+
+    async def list_features(self, lo=None, hi=None):
+        return self.server_stream('route_guide.RouterGuide/ListFeatures', Point(
+            lo=lo,
+            hi=hi,
+        )
+
+    async def record_route(self, stream):
+        return self.client_stream('route_guide.RouterGuide/RecordRoute', stream)
+
+    async def route_chat(self, stream):
+        return self.bistream('route_guide.RouterGuide/RouteChat', stream)

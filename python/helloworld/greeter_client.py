@@ -1,11 +1,9 @@
 import asyncio
-import grpc
 import helloworld
 
 
 async def run():
-    channel = grpc.insecure_channel('localhost:50051')
-    client = helloworld.GreeterClient(channel)
+    client = helloworld.GreeterClientH2('0.0.0.0', 50051)
     resp = await client.say_hello(name='you')
     print("Greeter client received: " + resp.message)
 

@@ -7,7 +7,7 @@ class Greeter(helloworld.Greeter):
 
 
 async def run():
-    client = helloworld.GreeterClient(Greeter())
+    client = helloworld.GreeterClientProxy(Greeter())
     resp = await client.say_hello(name='you')
     print("Greeter client received: " + resp.message)
 
